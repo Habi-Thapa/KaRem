@@ -1,6 +1,10 @@
 import { v4 as uuid } from "uuid";
 import { useState } from "react";
+import { useRef } from "react";
+
 import Button from "Common/button/Button";
+import Input from "Components/common/input/Input";
+import Title from "Components/common/title/Title";
 
 interface Clothes {
   id: string;
@@ -10,6 +14,8 @@ interface Clothes {
 }
 
 const App: React.FC = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [clothes, setClothes] = useState<Clothes[]>([
     {
       id: uuid(),
@@ -44,7 +50,7 @@ const App: React.FC = () => {
       id: uuid(),
       name: formData.name,
       imgURL: formData.imgURL,
-      atLaundry: formData.atLaundry,
+      atLaundry: true,
     };
     setClothes([...clothes, newCloth]);
     setFormData({
@@ -53,6 +59,9 @@ const App: React.FC = () => {
       imgFile: null,
       atLaundry: false,
     });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,48 +87,51 @@ const App: React.FC = () => {
       });
     }
   };
-  console.log(clothes);
+
+  const handleSwitchStatus = (id: string) => {
+    setClothes((prevClothes) => {
+      return prevClothes.map((cloth) => {
+        if (cloth.id === id) {
+          return { ...cloth, atLaundry: !cloth.atLaundry };
+        }
+        return cloth;
+      });
+    });
+  };
 
   return (
     <>
-      <div>Clothes Input</div>
+      <Title title="Cloth Details:" />
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="name">Name:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="imgFile">Upload Image:</label>
-          <input
-            type="file"
-            id="imgFile"
-            name="imgFile"
-            accept="image/*"
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="atLaundry">At Laundry:</label>
-          <input
-            type="checkbox"
-            id="atLaundry"
-            name="atLaundry"
-            checked={formData.atLaundry}
-            onChange={() =>
-              setFormData({ ...formData, atLaundry: !formData.atLaundry })
-            }
-          />
-        </div>
+        <Input
+          id="name"
+          name="name"
+          label="Name:"
+          value={formData.name}
+          onChange={handleInputChange}
+        />
+
+        <Input
+          forwardRef={fileInputRef}
+          id="imgFile"
+          type="file"
+          name="imgFile"
+          label="Upload Image:"
+          accept="image/*"
+          onChange={handleInputChange}
+        />
         <Button type="submit">Send to Laundry</Button>
       </form>
-      <ClothesStatusList mappingArray={clothes} atLaundry />
-      <ClothesStatusList mappingArray={clothes} />
+      <ClothesStatusList
+        mappingArray={clothes}
+        atLaundry={true} // Display clothes at laundry
+        handleSwitchStatus={handleSwitchStatus} // Pass handleSwitchStatus
+      />
+      <ClothesStatusList
+        mappingArray={clothes}
+        atLaundry={false} // Display clothes at home
+        handleSwitchStatus={handleSwitchStatus} // Pass handleSwitchStatus
+      />
     </>
   );
 };
@@ -129,11 +141,13 @@ export default App;
 type ClothesStatusListProps = {
   mappingArray: Clothes[];
   atLaundry?: boolean;
+  handleSwitchStatus: (id: string) => void; // Add handleSwitchStatus prop
 };
 
 const ClothesStatusList: React.FC<ClothesStatusListProps> = ({
   mappingArray,
   atLaundry = false,
+  handleSwitchStatus,
 }) => {
   const title = atLaundry ? "At Laundry:" : "At Home:";
   const filteredItems = mappingArray.filter(
@@ -142,9 +156,13 @@ const ClothesStatusList: React.FC<ClothesStatusListProps> = ({
   if (filteredItems.length > 0) {
     return (
       <>
-        <h1 className="font-medium text-xl">{title}</h1>
+        <Title title={title} />
         {filteredItems.map((filteredItem) => (
-          <ClothesStatusCard key={filteredItem.id} cardItem={filteredItem} />
+          <ClothesStatusCard
+            key={filteredItem.id}
+            cardItem={filteredItem}
+            handleSwitchStatus={handleSwitchStatus} // Pass handleSwitchStatus
+          />
         ))}
       </>
     );
@@ -156,13 +174,11 @@ const ClothesStatusList: React.FC<ClothesStatusListProps> = ({
 
 const ClothesStatusCard: React.FC<{
   cardItem: Clothes;
-}> = ({ cardItem }) => {
+  handleSwitchStatus: (id: string) => void; // Add handleSwitchStatus prop
+}> = ({ cardItem, handleSwitchStatus }) => {
   const { id, name, imgURL, atLaundry } = cardItem;
 
-  const handleSwitchStatus = () => {
-    // Call the onSwitchStatus callback to toggle the "atLaundry" value
-    console.log("Button Clicked");
-  };
+  const toggleClothesLocation = () => handleSwitchStatus(id);
 
   return (
     <div className="py-3">
@@ -171,7 +187,7 @@ const ClothesStatusCard: React.FC<{
         <h2 className="font-medium">Name:</h2>
         <span className="text capitalize ml-1"> {name}</span>
       </div>
-      <Button onClick={handleSwitchStatus}>
+      <Button onClick={toggleClothesLocation}>
         {atLaundry
           ? "Ah yaar, cloth is at Home"
           : "La mya, cloth is at Laundry"}
