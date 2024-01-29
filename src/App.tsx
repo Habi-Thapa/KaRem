@@ -5,6 +5,7 @@ import { useRef } from "react";
 import Button from "Common/button/Button";
 import Input from "Components/common/input/Input";
 import Title from "Components/common/title/Title";
+import ClothesStatusList from "Components/clothesStatusList/ClothesStatusList";
 
 interface Clothes {
   id: string;
@@ -17,24 +18,24 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [clothes, setClothes] = useState<Clothes[]>([
-    {
-      id: uuid(),
-      name: "pants",
-      imgURL: "https://via.placeholder.com/150",
-      atLaundry: true,
-    },
-    {
-      id: uuid(),
-      name: "shirt",
-      imgURL: "https://via.placeholder.com/150",
-      atLaundry: true,
-    },
-    {
-      id: uuid(),
-      name: "Shocks",
-      imgURL: "https://via.placeholder.com/150",
-      atLaundry: true,
-    },
+    // {
+    //   id: uuid(),
+    //   name: "pants",
+    //   imgURL: "https://via.placeholder.com/150",
+    //   atLaundry: true,
+    // },
+    // {
+    //   id: uuid(),
+    //   name: "shirt",
+    //   imgURL: "https://via.placeholder.com/150",
+    //   atLaundry: true,
+    // },
+    // {
+    //   id: uuid(),
+    //   name: "Shocks",
+    //   imgURL: "https://via.placeholder.com/150",
+    //   atLaundry: true,
+    // },
   ]);
 
   const [formData, setFormData] = useState({
@@ -137,61 +138,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-type ClothesStatusListProps = {
-  mappingArray: Clothes[];
-  atLaundry?: boolean;
-  handleSwitchStatus: (id: string) => void; // Add handleSwitchStatus prop
-};
-
-const ClothesStatusList: React.FC<ClothesStatusListProps> = ({
-  mappingArray,
-  atLaundry = false,
-  handleSwitchStatus,
-}) => {
-  const title = atLaundry ? "At Laundry:" : "At Home:";
-  const filteredItems = mappingArray.filter(
-    (item) => item.atLaundry === atLaundry
-  );
-  if (filteredItems.length > 0) {
-    return (
-      <>
-        <Title title={title} />
-        {filteredItems.map((filteredItem) => (
-          <ClothesStatusCard
-            key={filteredItem.id}
-            cardItem={filteredItem}
-            handleSwitchStatus={handleSwitchStatus} // Pass handleSwitchStatus
-          />
-        ))}
-      </>
-    );
-  } else {
-    // If the length of the filtered array is 0, return null (don't render anything)
-    return null;
-  }
-};
-
-const ClothesStatusCard: React.FC<{
-  cardItem: Clothes;
-  handleSwitchStatus: (id: string) => void; // Add handleSwitchStatus prop
-}> = ({ cardItem, handleSwitchStatus }) => {
-  const { id, name, imgURL, atLaundry } = cardItem;
-
-  const toggleClothesLocation = () => handleSwitchStatus(id);
-
-  return (
-    <div className="py-3">
-      {imgURL && <img src={imgURL} alt={name} width="100%" height="auto" />}
-      <div className="flex flex-row my-1">
-        <h2 className="font-medium">Name:</h2>
-        <span className="text capitalize ml-1"> {name}</span>
-      </div>
-      <Button onClick={toggleClothesLocation}>
-        {atLaundry
-          ? "Ah yaar, cloth is at Home"
-          : "La mya, cloth is at Laundry"}
-      </Button>
-    </div>
-  );
-};
