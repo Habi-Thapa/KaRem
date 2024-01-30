@@ -1,5 +1,7 @@
 import ClothesStatusCard from "Components/clothesStatusCard/ClothesStatusCard";
 import Title from "Common/title/Title";
+import { useContext } from "react";
+import { HandleSwitchStatusContext } from "../../App";
 
 interface Clothes {
   id: string;
@@ -11,14 +13,14 @@ interface Clothes {
 type ClothesStatusListProps = {
   mappingArray: Clothes[];
   atLaundry?: boolean;
-  handleSwitchStatus: (id: string) => void; // Add handleSwitchStatus prop
 };
 
 const ClothesStatusList: React.FC<ClothesStatusListProps> = ({
   mappingArray,
   atLaundry = false,
-  handleSwitchStatus,
 }) => {
+  const handleSwitchStatus = useContext(HandleSwitchStatusContext);
+
   const title = atLaundry ? "At Laundry:" : "At Home:";
   const filteredItems = mappingArray.filter(
     (item) => item.atLaundry === atLaundry

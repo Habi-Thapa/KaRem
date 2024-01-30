@@ -1,11 +1,15 @@
 import { v4 as uuid } from "uuid";
-import { useState } from "react";
+import { createContext, useState } from "react";
 import { useRef } from "react";
 
 import Button from "Common/button/Button";
-import Input from "Components/common/input/Input";
-import Title from "Components/common/title/Title";
+import Input from "Common/input/Input";
+import Title from "Common/title/Title";
 import ClothesStatusList from "Components/clothesStatusList/ClothesStatusList";
+
+export const HandleSwitchStatusContext = createContext<(id: string) => void>(
+  () => {}
+);
 
 interface Clothes {
   id: string;
@@ -100,39 +104,41 @@ const App: React.FC = () => {
     });
   };
 
+  console.log("clothes", clothes);
+
   return (
     <>
-      <Title title="Cloth Details:" />
-      <form onSubmit={handleSubmit}>
-        <Input
-          id="name"
-          name="name"
-          label="Name:"
-          value={formData.name}
-          onChange={handleInputChange}
-        />
+      <HandleSwitchStatusContext.Provider value={handleSwitchStatus}>
+        <Title title="Cloth Details:" />
+        <form onSubmit={handleSubmit}>
+          <Input
+            id="name"
+            name="name"
+            label="Name:"
+            value={formData.name}
+            onChange={handleInputChange}
+          />
 
-        <Input
-          forwardRef={fileInputRef}
-          id="imgFile"
-          type="file"
-          name="imgFile"
-          label="Upload Image:"
-          accept="image/*"
-          onChange={handleInputChange}
+          <Input
+            forwardRef={fileInputRef}
+            id="imgFile"
+            type="file"
+            name="imgFile"
+            label="Upload Image:"
+            accept="image/*"
+            onChange={handleInputChange}
+          />
+          <Button type="submit">Send to Laundry</Button>
+        </form>
+        <ClothesStatusList
+          mappingArray={clothes}
+          atLaundry={true} // Display clothes at laundry
         />
-        <Button type="submit">Send to Laundry</Button>
-      </form>
-      <ClothesStatusList
-        mappingArray={clothes}
-        atLaundry={true} // Display clothes at laundry
-        handleSwitchStatus={handleSwitchStatus} // Pass handleSwitchStatus
-      />
-      <ClothesStatusList
-        mappingArray={clothes}
-        atLaundry={false} // Display clothes at home
-        handleSwitchStatus={handleSwitchStatus} // Pass handleSwitchStatus
-      />
+        <ClothesStatusList
+          mappingArray={clothes}
+          atLaundry={false} // Display clothes at home
+        />
+      </HandleSwitchStatusContext.Provider>
     </>
   );
 };

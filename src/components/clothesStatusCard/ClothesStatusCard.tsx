@@ -5,6 +5,7 @@ interface Clothes {
   imgURL: string | null;
   atLaundry: boolean;
 }
+
 const ClothesStatusCard: React.FC<{
   cardItem: Clothes;
   handleSwitchStatus: (id: string) => void; // Add handleSwitchStatus prop
